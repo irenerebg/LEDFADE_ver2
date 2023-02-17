@@ -10,7 +10,6 @@ MQTT los valores de los tiempos transcurridos
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-
 //Declaración de constantes para el LED
 unsigned int tiempoApagado = 5000;
 unsigned int tiempoFade = 5000;
