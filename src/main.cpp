@@ -9,14 +9,38 @@ MQTT los valores de los tiempos transcurridos
 //IMPORTACIÓN DE MÓDULOS
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <SerialCommand.h>
+SerialCommand sCmd;
 
 //Declaración de constantes para el LED
-unsigned int tiempoApagado = 5000;
-unsigned int tiempoFade = 5000;
+unsigned int tiempoApagado = 1000;
+unsigned int tiempoFade = 1000;
 float delayIT = tiempoFade/(255*2);
 int freq = 5000;
 int ledChannel = 0;
 int resolution = 8;
+
+//COMANDOS PARA LA PLACA
+int cmdTiempo(char* param, uint8_t len, char* response) {
+    sprintf(response, "El tiempo de apagado es %d  y el de FADE es %d", tiempoApagado, tiempoFade);
+    return strlen(response);
+}
+
+int cmdFrecuencia(char* param, uint8_t len, char* response) {
+    sprintf(response, "La frecuencia es %d", freq);
+    return strlen(response);
+}
+
+int cmdLED(char* param, uint8_t len, char* response) {
+    sprintf(response, "El LED está en el canal %d", ledChannel);
+    return strlen(response);
+}
+
+void CommBegin() {
+    sCmd.addCommand("T", cmdTiempo);
+    sCmd.addCommand("F", cmdFrecuencia);
+    sCmd.addCommand("L", cmdLED);
+}
 
 
 //FUNCIÓN PARA ENVIAR UN JSON CON LOS TIEMPOS QUE TENDRÁ EL BUCLE
@@ -40,6 +64,7 @@ void sendjason() {
 void setup() {
   Serial.begin(115200);
   delay(1000);
+  CommBegin();
   sendjason();
   Serial.println("-------------");
   ledcSetup(ledChannel, freq, resolution);
@@ -67,5 +92,5 @@ void loop() {
   ledcWrite(ledChannel, LOW);
   delay(tiempoApagado);
   FADE();
-
+  
 }
