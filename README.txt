@@ -9,4 +9,8 @@ y comienza el bucle en el LED situado en la placa.
 
 En esta rama:
 Puedes escribir comandos para solicitar datos de entrada.
-Todavía no funciona
+Todavía no funciona.
+
+Se conecta a la WiFi y a un servidor MQTT para enviar y recibir
+tiempos.
+Todavía no funciona.
