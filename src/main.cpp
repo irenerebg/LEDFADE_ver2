@@ -17,22 +17,25 @@ unsigned int tiempoApagado = 1000;
 unsigned int tiempoFade = 1000;
 float delayIT = tiempoFade/(255*2);
 int freq = 5000;
-int ledChannel = 0;
+int ledChannel = 0; //placa D1 R32 es 0, placa esp32 c3 devkitm 1 es
 int resolution = 8;
 
 //COMANDOS PARA LA PLACA
+#define START_CHAR '$'
+#define END_CHAR ';'
+
 int cmdTiempo(char* param, uint8_t len, char* response) {
-    sprintf(response, "El tiempo de apagado es %d  y el de FADE es %d", tiempoApagado, tiempoFade);
+    sprintf(response, "$El tiempo de apagado es %d  y el de FADE es %d;", tiempoApagado, tiempoFade);
     return strlen(response);
 }
 
 int cmdFrecuencia(char* param, uint8_t len, char* response) {
-    sprintf(response, "La frecuencia es %d", freq);
+    sprintf(response, "$La frecuencia es %d;", freq);
     return strlen(response);
 }
 
 int cmdLED(char* param, uint8_t len, char* response) {
-    sprintf(response, "El LED está en el canal %d", ledChannel);
+    sprintf(response, "$El LED está en el canal %d;", ledChannel);
     return strlen(response);
 }
 
@@ -86,11 +89,38 @@ void FADE() {
   }
 }
 
+void processcommand() {
+    char c;
+    char response[100];
+    static char cmd_buffer[100];
+    static unsigned int cmd_p = 0;
+
+    while (Serial.available()) {
+        c = char(Serial.read());
+
+        if (c == START_CHAR)
+            cmd_p = 0;
+
+        cmd_buffer[cmd_p] = c;
+        cmd_p += 1;
+        cmd_p %= 20;
+
+        if (c == END_CHAR) {
+            cmd_buffer[cmd_p] = 0;
+            cmd_p = 0;
+            sCmd.processCommand(cmd_buffer, response);
+            Serial.println(response);
+        }
+    }
+}
+
+
 void loop() {
   //Funcionamiento del LED
   Serial.println("Apagado");
   ledcWrite(ledChannel, LOW);
   delay(tiempoApagado);
   FADE();
-  
+  //Comandos de datos
+  processcommand();
 }
